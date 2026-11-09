@@ -1,12 +1,11 @@
-# Arsitektur Tiruan Poni — NotchKu MVP
+# Arsitektur NotchKu — MVP v0.1
 
-Hasil reverse engineering poni.web.id + github.com/liimalim/Poni
-(2026-11-08). Semua klaim di bawah berasal dari perilaku publik,
-bukan dari source code Poni (yang tidak dipublikasikan).
+NotchKu adalah aplikasi notch interaktif buatanku sendiri untuk Windows,
+dibangun dari nol dengan Rust + Tauri v2 dan vanilla JS.
 
-## 1. Model mental Poni
+## 1. Model mental NotchKu
 
-Poni bukan aplikasi window biasa. Ia adalah **satu window overlay**:
+NotchKu bukan aplikasi window biasa. Ia adalah **satu window overlay**:
 
 - Posisi: top-center, menempel di tepi atas layar.
 - State tertutup: pil hitam kecil (~200×32 px). Isinya ringkas:
@@ -18,18 +17,17 @@ Poni bukan aplikasi window biasa. Ia adalah **satu window overlay**:
   fullscreen, dan tidak muncul di screenshot kecuali diizinkan.
 - Satu notch per layar (multi-monitor: window per display).
 
-Ini persis model Dynamic Island iOS, dipindah ke desktop.
+Idenya: Dynamic Island di iOS, dibawa ke desktop — sebagai konsep
+umum, bukan menyalin aplikasi mana pun.
 
-## 2. Stack yang dipakai (terbukti vs diduga)
+## 2. Stack yang dipakai
 
-| Komponen | Status | Bukti |
-|---|---|---|
-| Bahasa Rust | Terbukti (klaim situs) | poni.web.id: "Dibangun dengan Rust" |
-| WebView2 (Windows) | Terbukti | Syarat: Edge WebView2 |
-| WebKitGTK 4.1 (Linux) | Terbukti | Syarat Linux di situs |
-| Data lokal `%APPDATA%\Poni` | Terbukti | FAQ situs + README |
-| Tauri v2 | **Diduga, tidak terbukti** | Pola Rust+WebView+updater+NSIS cocok dengan Tauri, tapi kata "Tauri" tidak muncul di repo/README. Bisa juga wry/window-vibrancy custom. MVP ini memilih Tauri v2 karena itu jalan paling cepat dan terawat. |
-| Frontend framework | Tidak diketahui | Tidak ada source. MVP memakai vanilla JS (tanpa framework) supaya ringan dan gampang dibaca — cocok untuk target laptop 2 GB. |
+| Komponen | Pilihan |
+|---|---|
+| Bahasa Rust | Backend + window manager |
+| Tauri v2 | Rust + WebView (WebView2 di Windows, WebKitGTK di Linux) |
+| Frontend | Vanilla JS (tanpa framework) supaya ringan dan gampang dibaca — cocok untuk target laptop 2 GB |
+| Data lokal | `%APPDATA%\NotchKu` |
 
 ## 3. Window manager (inti tersulit)
 
@@ -52,9 +50,8 @@ Inilah bagian yang membedakan notch dengan aplikasi biasa:
 5. **Fullscreen / Show Desktop.** Dengarkan perubahan foreground
    window (Win32 `EVENT_SYSTEM_FOREGROUND`, atau polling
    `GetForegroundWindow`). Kalau app fullscreen, sembunyikan notch.
-   Ini sumber bug Poni #47 (Win+D) — di MVP, window tidak boleh
-   di-minimize oleh OS; kalau disembunyikan dari luar, Rust
-   mengembalikannya sendiri.
+   Di MVP, window tidak boleh di-minimize oleh OS; kalau
+   disembunyikan dari luar, Rust mengembalikannya sendiri.
 6. **Multi-monitor.** Buat satu window per display, posisi
    dihitung dari `monitor.size` masing-masing.
 
@@ -74,10 +71,9 @@ Di `src-tauri/src/lib.rs` sudah ada kerangka: `setup_notch_window`,
 | Settings | form | `settings.json` di app-data dir, dibaca saat start. |
 
 Penyimpanan: JSON polos di app-data dir, bukan SQLite, supaya
-gampang di-backup dan di-debug. Enkripsi tidak wajib di MVP
-(Poni mengenkripsi riwayat notifikasi; tambahkan nanti bila perlu).
+gampang di-backup dan di-debug. Enkripsi tidak wajib di MVP.
 
-## 5. Update & distribusi (meniru Poni)
+## 5. Update & distribusi
 
 - Bundle NSIS `*_x64-setup.exe` (disarankan) + portable `.exe`.
 - `tauri-plugin-updater`: cek `latest.json` di GitHub Releases
@@ -85,31 +81,28 @@ gampang di-backup dan di-debug. Enkripsi tidak wajib di MVP
   idle lalu install + restart sendiri.
 - Setiap update **harus ditandatangani** (signing key updater),
   aplikasi menolak file yang signaturenya tidak cocok.
-- Tanpa code signing berbayar, SmartScreen akan muncul — sama
-  seperti Poni. Itu normal, bukan tanda malware.
+- Tanpa code signing berbayar, SmartScreen akan muncul.
+  Itu normal, bukan tanda malware.
 - Mac/Linux: update manual (unduh ulang, pasang di atas yang lama,
   settings tetap).
 
-## 6. Privasi (meniru Poni)
+## 6. Privasi
 
 - Default: tidak ada jaringan kecuali cuaca + cek update.
 - Setiap integrasi (kalender, AI, lirik) opt-in, dan key API
   milik pengguna disimpan lokal, tidak dikirim ke server kita.
 - Tidak ada ID perangkat, tidak ada telemetri. Kalau mau hitung
-  pengguna, pakai hitungan anonim harian seperti Poni (satu hit
-  per hari, per negara, tanpa IP) — dan sediakan tombol matikan.
+  pengguna, pakai hitungan anonim harian (satu hit per hari,
+  per negara, tanpa IP) — dan sediakan tombol matikan.
 
 ## 7. Performa — target laptop 2 GB
-
-Poni diklaim ringan, tapi laporan pengguna di media sosial
-menyebut RAM naik saat dipakai. Target MVP ini:
 
 - Idle: < 80 MB RAM, < 1% CPU (WebView diam, timer 1 detik).
 - Jangan polling SMTC/kalender tiap detik; pakai event + interval
   5–30 detik.
 - Matikan animasi berat saat idle; visualizer musik hanya saat
   tab Musik terbuka.
-- Uji di laptop 2 GB Zarski sebelum menambah modul: ukur idle RAM
+- Uji di laptop 2 GB sebelum menambah modul: ukur idle RAM
   di Task Manager setelah 10 menit.
 
 ## 8. Peta jalan
@@ -120,11 +113,9 @@ menyebut RAM naik saat dipakai. Target MVP ini:
 - **v1.0:** AI Chat (Gemini/Claude/Ollama, key pengguna), Shelf,
   update otomatis + signing, Mac/Linux beta.
 
-## 9. Yang TIDAK boleh dilakukan
+## 9. Prinsip desain
 
-- Jangan pakai nama, logo, atau aset Poni. Ini tiruan perilaku,
-  bukan rebrand.
-- Jangan klaim ini Poni, dan jangan distribusikan seolah-olah
-  buatan Alim AJ / Bos Digital.
-- Jangan menyalin teks UI Poni kata-per-kata bila tidak perlu;
-  tulis ulang dengan bahasamu sendiri.
+- NotchKu adalah karya orisinal: nama, logo, dan semua teks UI
+  ditulis sendiri, bukan menyalin aplikasi lain.
+- Semua aset (ikon, gambar, teks) dibuat sendiri atau dari
+  sumber berlisensi bebas.

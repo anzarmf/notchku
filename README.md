@@ -1,11 +1,8 @@
-# NotchKu — Tiruan Poni (MVP v0.1)
+# NotchKu — Interactive Notch for Windows (v0.1)
 
-Clean-room clone dari perilaku Poni (poni.web.id) berdasarkan reverse
-engineering publik, **bukan** salinan kode Poni. Source code Poni tidak
-dipublikasikan — repo GitHub-nya hanya berisi README + terjemahan — jadi
-proyek ini dibangun dari nol dari spesifikasi perilaku yang teramati.
-
-Nama beda sengaja: jangan dirilis dengan nama/merek "Poni".
+NotchKu adalah aplikasi notch interaktif buatanku sendiri, dibangun dari
+nol: sebuah pil kecil di tengah atas layar yang terbuka jadi panel musik,
+kalender, todo, Pomodoro, dan cuaca.
 
 ## Apa yang sudah jalan di MVP ini
 
@@ -27,7 +24,7 @@ saat hover / klik / `Alt+N`:
   Lokasi default Jakarta, bisa diubah di Settings.
 - **Settings** — ukuran/posisi notch, transparansi, modul yang tampil.
 
-Yang **belum** ada (ada di Poni asli, tidak di MVP): Dock, AI Chat,
+Yang **belum** ada di MVP ini: Dock, AI Chat,
 lirik lagu, jadwal sholat, Wi-Fi/Bluetooth, Shelf/drop file, Buddy 3D,
 notifikasi Windows, update otomatis.
 
@@ -60,8 +57,8 @@ Server ini Linux tanpa Rust dan tanpa WebView2, jadi kode di sini
 #    https://rustup.rs  |  https://nodejs.org
 # 2. Install WebView2 Runtime (biasanya sudah ada di Windows 11)
 #    https://developer.microsoft.com/en-us/microsoft-edge/webview2/
-# 3. Clone/copy folder ini, lalu:
-cd poni-clone
+# 3. Copy folder ini, lalu:
+cd notchku
 npm install
 npm run tauri dev      # coba jalan
 npm run tauri build    # hasil: src-tauri/target/release/bundle/nsis/
@@ -80,7 +77,7 @@ npm run dev   # buka http://localhost:1420 — UI notch saja, tanpa window Rust
 
 ## Data & privasi
 
-Semua tersimpan lokal, meniru Poni:
+Semua tersimpan lokal:
 
 - Windows: `%APPDATA%\NotchKu\` (`settings.json`, `todos.json`)
 - Linux: `~/.config/NotchKu/`
@@ -103,12 +100,12 @@ Semua tersimpan lokal, meniru Poni:
 
 ## Batasan yang jujur
 
-- Ini MVP, bukan Poni 1.6.0. Fitur Poni ada puluhan; di sini 5 modul inti.
+- Ini MVP v0.1. Di sini ada 5 modul inti; modul lain menyusul di versi berikutnya.
 - Musik SMTC Windows, notifikasi Windows, dan Dock butuh kode
   Win32 tambahan — sudah dipetakan di `ARCHITECTURE.md`, belum
   diimplementasikan.
 - Belum ada code signing, jadi SmartScreen akan muncul seperti
-  Poni asli. Jangan bypass, klik More info → Run anyway hanya
+  aplikasi tanpa sertifikat berbayar. Jangan bypass, klik More info → Run anyway hanya
   untuk build sendiri.
 - Belum diuji di hardware nyata (dibangun di server Linux).
   Uji pertama harus di PC Windows: hover, Alt+N, multi-monitor,

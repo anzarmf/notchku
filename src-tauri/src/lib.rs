@@ -1,7 +1,7 @@
 // NotchKu — Rust backend (Tauri v2)
 // Window notch: satu window frameless transparan di tengah atas,
 // dua ukuran: tertutup (pil kecil) dan terbuka (panel).
-// Clean-room MVP. Lihat ARCHITECTURE.md untuk desain lengkap.
+// MVP. Lihat ARCHITECTURE.md untuk desain lengkap.
 
 use serde::{Deserialize, Serialize};
 use std::fs;
