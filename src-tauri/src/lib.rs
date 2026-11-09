@@ -156,7 +156,6 @@ pub fn run() {
         .manage(AppState {
             expanded: std::sync::Mutex::new(false),
         })
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
             // Posisi awal: pil tertutup di tengah atas layar utama.

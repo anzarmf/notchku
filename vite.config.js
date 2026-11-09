@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  root: "src",
   clearScreen: false,
   server: { port: 1420, strictPort: true },
   envPrefix: "VITE_",
-  build: { target: "es2021", outDir: "dist" },
+  build: { target: "es2021", outDir: "../dist", emptyOutDir: true },
 });

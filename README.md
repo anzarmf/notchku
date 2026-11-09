@@ -4,6 +4,15 @@ NotchKu adalah aplikasi notch interaktif buatanku sendiri, dibangun dari
 nol: sebuah pil kecil di tengah atas layar yang terbuka jadi panel musik,
 kalender, todo, Pomodoro, dan cuaca.
 
+## ⬇️ Download (Windows)
+
+**[Download NotchKu_0.1.0_x64-setup.exe](https://github.com/anzarmf/notchku/releases/latest/download/NotchKu_0.1.0_x64-setup.exe)**
+
+Jalankan installer-nya, lalu tekan `Alt+N` untuk membuka notch.
+SmartScreen mungkin muncul karena installer belum ditandatangani
+(code signing) — klik "More info" → "Run anyway". Semua rilis ada di
+[Releases](https://github.com/anzarmf/notchku/releases).
+
 ## Apa yang sudah jalan di MVP ini
 
 Notch hitam di tengah atas layar, tertutup sebagai pil kecil, terbuka
