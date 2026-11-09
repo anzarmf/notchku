@@ -44,12 +44,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v0.1.0
-          releaseName: "NotchKu v0.1.0"
+          tagName: v0.1.1
+          releaseName: "NotchKu v0.1.1"
           releaseBody: |
-            NotchKu v0.1.0 — interactive notch for Windows.
+            NotchKu v0.1.1 — interactive notch for Windows.
 
-            Download `NotchKu_0.1.0_x64-setup.exe` below, run it, and press `Alt+N` to open the notch.
+            Download `NotchKu_0.1.1_x64-setup.exe` below, run it, and press `Alt+N` to open the notch.
             Windows SmartScreen may warn because the installer is not code-signed yet — click "More info" → "Run anyway".
           releaseDraft: false
           prerelease: false
