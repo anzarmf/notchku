@@ -6,7 +6,9 @@ kalender, todo, Pomodoro, dan cuaca.
 
 ## ⬇️ Download (Windows)
 
-**[Download NotchKu_0.1.0_x64-setup.exe](https://github.com/anzarmf/notchku/releases/latest/download/NotchKu_0.1.0_x64-setup.exe)**
+> Satu installer, langsung jalan — WebView2 sudah tertanam di dalam installer, tidak perlu instal apapun lagi.
+
+**[Download NotchKu_0.1.1_x64-setup.exe](https://github.com/anzarmf/notchku/releases/latest/download/NotchKu_0.1.1_x64-setup.exe)**
 
 Jalankan installer-nya, lalu tekan `Alt+N` untuk membuka notch.
 SmartScreen mungkin muncul karena installer belum ditandatangani
@@ -71,7 +73,7 @@ cd notchku
 npm install
 npm run tauri dev      # coba jalan
 npm run tauri build    # hasil: src-tauri/target/release/bundle/nsis/
-#    -> NotchKu_0.1.0_x64-setup.exe  (NSIS, update sendiri via tauri-plugin-updater)
+#    -> NotchKu_0.1.1_x64-setup.exe  (NSIS, update sendiri via tauri-plugin-updater)
 ```
 
 Butuh juga: Visual Studio Build Tools (C++ workload) untuk
