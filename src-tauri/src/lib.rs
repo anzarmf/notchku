@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::fs;
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, State};
+use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, State};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, ShortcutState};
 
 pub const COLLAPSED_W: u32 = 220;
@@ -13,7 +13,7 @@ pub const COLLAPSED_H: u32 = 32;
 pub const EXPANDED_W: u32 = 560;
 pub const EXPANDED_H: u32 = 380;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub city: String,
     pub latitude: f64,
