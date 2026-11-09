@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NotchKu</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="notch" class="collapsed" role="application" aria-label="NotchKu">
+    <!-- STATE TERTUTUP: pil kecil -->
+    <button id="pill" title="Klik / Alt+N untuk membuka">
+      <span id="pill-left">☁️ <span id="pill-weather">--°</span></span>
+      <span id="pill-clock">--:--</span>
+      <span id="pill-right">🔋 <span id="pill-battery">--%</span></span>
+    </button>
+
+    <!-- STATE TERBUKA: panel -->
+    <div id="panel" hidden>
+      <header>
+        <nav id="tabs" aria-label="Modul">
+          <button data-tab="musik" class="active">🎵 Musik</button>
+          <button data-tab="kalender">📅 Kalender</button>
+          <button data-tab="todo">✅ Todo</button>
+          <button data-tab="pomodoro">🍅 Fokus</button>
+          <button data-tab="cuaca">🌤️ Cuaca</button>
+        </nav>
+        <button id="close-btn" title="Tutup (Esc)">✕</button>
+      </header>
+
+      <main>
+        <section id="tab-musik" class="tab active">
+          <div class="now-playing">
+            <div class="cover">🎵</div>
+            <div>
+              <strong id="song-title">Tidak ada lagu diputar</strong>
+              <p id="song-artist">Putar lagu di Spotify / browser, atau coba demo di bawah</p>
+              <div class="progress"><div id="song-progress" style="width:0%"></div></div>
+              <p class="muted"><span id="song-time">0:00</span> / <span id="song-dur">3:24</span></p>
+            </div>
+          </div>
+          <div class="controls">
+            <button id="prev-btn">⏮</button>
+            <button id="play-btn">▶</button>
+            <button id="next-btn">⏭</button>
+            <label>🔊 <input id="volume" type="range" min="0" max="100" value="70" /></label>
+          </div>
+          <p class="muted small">MVP: pemutar demo. Di Windows asli, ganti dengan SMTC (lihat ARCHITECTURE.md §4).</p>
+        </section>
+
+        <section id="tab-kalender" class="tab">
+          <h2 id="cal-month">—</h2>
+          <div id="cal-grid" class="cal-grid"></div>
+          <h3>Rapat berikutnya</h3>
+          <ul id="cal-events" class="list"></ul>
+        </section>
+
+        <section id="tab-todo" class="tab">
+          <form id="todo-form">
+            <input id="todo-input" placeholder="Tulis tugas… (contoh: kirim laporan besok jam 9)" autocomplete="off" />
+            <button type="submit">＋ Tambah</button>
+          </form>
+          <ul id="todo-list" class="list"></ul>
+          <p class="muted small"><span id="todo-count">0</span> tugas tersisa · tersimpan lokal</p>
+        </section>
+
+        <section id="tab-pomodoro" class="tab">
+          <div class="timer-big" id="pomo-time">25:00</div>
+          <p id="pomo-label">Fokus — 25 menit</p>
+          <div class="controls">
+            <button id="pomo-start">▶ Mulai</button>
+            <button id="pomo-reset">↺ Reset</button>
+            <button id="pomo-mode">Istirahat 5 mnt</button>
+          </div>
+        </section>
+
+        <section id="tab-cuaca" class="tab">
+          <div class="weather-big"><span id="wx-temp">--°</span> <span id="wx-desc">Memuat…</span></div>
+          <p class="muted">Jakarta · Open-Meteo · tanpa API key · <button id="wx-refresh" class="link">refresh</button></p>
+          <p class="muted small" id="wx-meta">—</p>
+        </section>
+      </main>
+
+      <footer>
+        <span>NotchKu v0.1.0 · MVP tiruan Poni</span>
+        <span class="muted">Alt+N buka/tutup · Esc tutup</span>
+      </footer>
+    </div>
+  </div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
