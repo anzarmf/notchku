@@ -44,7 +44,8 @@ jobs:
           Copy-Item notchku-wpf\bin\Release\net48\NotchKu.exe NotchKu_0.2.0_x64.exe
 
       - name: Build installer (NSIS)
-        run: makensis notchku-wpf/installer.nsi
+        working-directory: notchku-wpf
+        run: makensis installer.nsi
 
       - name: Check installer size
         shell: pwsh
