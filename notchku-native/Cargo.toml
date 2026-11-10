@@ -13,11 +13,11 @@ path = "src/main.rs"
 slint-build = "1.10"
 
 [dependencies]
-slint = "1.10"
+slint = { version = "1.10", default-features = false, features = ["std", "backend-default", "renderer-software", "compat-1-18"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = { version = "0.4", features = ["serde"] }
-reqwest = { version = "0.12", features = ["blocking", "json", "rustls-tls"], default-features = false }
+ureq = { version = "2", features = ["json", "rustls"] }
 global-hotkey = "0.6"
 
 [target.'cfg(windows)'.dependencies]
@@ -28,3 +28,4 @@ lto = true
 codegen-units = 1
 opt-level = "s"
 strip = true
+panic = "abort"

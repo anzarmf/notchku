@@ -62,11 +62,12 @@ fn fetch_weather(lat: f64, lon: f64) -> Option<(String, String)> {
         "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,weather_code,relative_humidity_2m",
         lat, lon
     );
-    let client = reqwest::blocking::Client::builder()
+    let resp: WeatherResp = ureq::get(&url)
         .timeout(Duration::from_secs(10))
-        .build()
+        .call()
+        .ok()?
+        .into_json()
         .ok()?;
-    let resp: WeatherResp = client.get(&url).send().ok()?.json().ok()?;
     let c = resp.current;
     let short = format!("{:.0}° {}", c.temperature_2m, weather_label(c.weather_code));
     let detail = format!(

@@ -4,10 +4,13 @@ NotchKu adalah aplikasi notch interaktif buatanku sendiri, dibangun dari
 nol: sebuah pil kecil di tengah atas layar yang terbuka jadi panel musik,
 kalender, todo, Pomodoro, dan cuaca.
 
-**v0.2.0 sepenuhnya native (Slint/Rust) — tanpa WebView, tanpa browser,
-tanpa runtime tambahan.** Kode Tauri/WebView lama masih ada di repo ini
-sebagai arsip, tapi tidak dipakai lagi; build aktif ada di
-[`notchku-native/`](notchku-native/).
+**v0.2.0 sepenuhnya native (WPF / .NET Framework 4.8) — tanpa WebView,
+tanpa browser, tanpa runtime tambahan.** .NET Framework 4.8 sudah bawaan
+Windows 10/11, jadi user tidak perlu instal apapun. Build aktif ada di
+[`notchku-wpf/`](notchku-wpf/). Kode Tauri/WebView lama dan percobaan
+Slint/Rust masih ada di repo ini sebagai arsip, tapi tidak dipakai lagi:
+Slint menghasilkan EXE ~12 MB (di atas batas 6 MB), sedangkan EXE WPF
+di bawah 1 MB.
 
 ## ⬇️ Download (Windows)
 
@@ -25,71 +28,55 @@ SmartScreen mungkin muncul karena installer belum ditandatangani
 Notch hitam di tengah atas layar, tertutup sebagai pil kecil, terbuka
 saat hover / klik / `Alt+N`:
 
-- **Musik** — kontrol putar/jeda/prev/next, progress bar, volume.
-  Di Windows nyata: baca media yang sedang diputar lewat Windows
-  System Media Transport Controls (SMTC) via `windows-rs`. Di MVP
-  ini masih pemutar demo lokal (file `src/main.js`, fungsi
-  `initMusicDemo`), supaya UI bisa dicoba tanpa SMTC.
-- **Kalender** — bulan ini + rapat berikutnya (data contoh di
-  `src/main.js`, ganti dengan Google Calendar / iCal di `lib.rs`).
-- **Todo** — tambah, centang, hapus. Tersimpan lokal.
-- **Pomodoro** — 25/5, timer + stopwatch, hitung mundur tetap
-  terlihat di notch tertutup.
-- **Cuaca** — Open-Meteo, tanpa API key
-  (`https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&current=temperature_2m,weather_code`).
-  Lokasi default Jakarta, bisa diubah di Settings.
-- **Settings** — ukuran/posisi notch, transparansi, modul yang tampil.
+- **Musik** — kontrol putar/jeda/prev/next, progress bar.
+  Di v0.2.0 masih pemutar demo lokal (3 lagu contoh), supaya UI bisa
+  dicoba tanpa integrasi media. Integrasi SMTC Windows menyusul.
+- **Kalender** — grid bulan ini, hari ini ditandai, navigasi bulan.
+- **Todo** — tambah, centang, hapus. Tersimpan lokal di
+  `%APPDATA%\NotchKu\todos.json`.
+- **Pomodoro** — Fokus 25 menit / Istirahat 5 menit, mulai, jeda, reset.
+- **Cuaca** — Open-Meteo, tanpa API key (Jakarta, bisa diubah di kode).
+  Menampilkan suhu, kondisi, kelembapan, dan kecepatan angin.
+- **Hotkey global** — `Alt+N` membuka/menutup notch dari mana saja.
 
 Yang **belum** ada di MVP ini: Dock, AI Chat,
 lirik lagu, jadwal sholat, Wi-Fi/Bluetooth, Shelf/drop file, Buddy 3D,
 notifikasi Windows, update otomatis.
 
-## Arsitektur
+## Arsitektur (v0.2.0)
 
 ```
-+------------------+  Tauri IPC (invoke)  +-------------------+
-|  Frontend (Web)  | --------------------> |  Rust (src-tauri) |
-|  HTML/CSS/JS     | <-------------------- |  main.rs / lib.rs |
-|  src/index.html  |   events / state     |  - window manager |
-|  src/main.js     |                      |  - storage JSON   |
-|  src/styles.css  |                      |  - global shortcut|
-+------------------+                      |  - update checker |
-        |                                 +-------------------+
-        | WebView2 (Win) / WebKitGTK (Linux)
-        v
-   OS window: top-center, always-on-top, frameless,
-   transparent, click-through di luar pil saat tertutup
++-------------------------------+
+|  WPF (.NET Framework 4.8)    |
+|  MainWindow.xaml — pil + panel|
+|  MainWindow.xaml.cs — logika  |
+|  - jam, cuaca (Open-Meteo)    |
+|  - todo JSON, kalender,       |
+|    pomodoro, musik demo       |
+|  - hotkey Alt+N (RegisterHotKey)|
++-------------------------------+
+   Window: top-center, always-on-top, frameless,
+   transparan, 220x32 saat tertutup, 560x380 saat terbuka
 ```
 
-Detail lengkap: `ARCHITECTURE.md`.
+Detail lengkap: `ARCHITECTURE.md` (masih mendeskripsikan versi Tauri lama;
+arsitektur WPF di atas adalah yang aktif).
 
-## Cara build (di PC Windows, bukan di server Linux ini)
+## Cara build (di PC Windows, atau via GitHub Actions)
 
-Server ini Linux tanpa Rust dan tanpa WebView2, jadi kode di sini
-**tidak dikompilasi di server**. Build di PC Windows 10/11 64-bit:
+Build otomatis berjalan di GitHub Actions setiap push ke `notchku-wpf/`
+dan menerbitkan Release v0.2.0. Build manual di PC Windows 10/11 64-bit:
 
 ```powershell
-# 1. Install Rust (rustup) + Node.js 20 LTS
-#    https://rustup.rs  |  https://nodejs.org
-# 2. Install WebView2 Runtime (biasanya sudah ada di Windows 11)
-#    https://developer.microsoft.com/en-us/microsoft-edge/webview2/
-# 3. Copy folder ini, lalu:
+# 1. Install .NET SDK 8 (https://dotnet.microsoft.com/download)
+# 2. Copy folder ini, lalu:
 cd notchku
-npm install
-npm run tauri dev      # coba jalan
-npm run tauri build    # hasil: src-tauri/target/release/bundle/nsis/
-#    -> NotchKu_0.1.2_x64-setup.exe  (NSIS, update sendiri via tauri-plugin-updater)
+dotnet build notchku-wpf/NotchKu.csproj -c Release
+# hasil: notchku-wpf\bin\Release\net48\NotchKu.exe
+# installer: makensis notchku-wpf/installer.nsi
 ```
 
-Butuh juga: Visual Studio Build Tools (C++ workload) untuk
-kompilasi Rust di Windows.
-
-Di Linux (opsional, untuk uji UI saja):
-
-```bash
-npm install
-npm run dev   # buka http://localhost:1420 — UI notch saja, tanpa window Rust
-```
+Tidak perlu Rust, Node.js, atau WebView2.
 
 ## Data & privasi
 
@@ -104,22 +91,18 @@ Semua tersimpan lokal:
 
 | File | Isi |
 |---|---|
-| `src-tauri/Cargo.toml` | Dependensi Rust |
-| `src-tauri/tauri.conf.json` | Konfigurasi window, bundle, updater |
-| `src-tauri/src/main.rs` | Entry point |
-| `src-tauri/src/lib.rs` | Window notch, shortcut Alt+N, commands storage |
-| `src-tauri/capabilities/default.json` | Izin Tauri v2 |
-| `src/index.html` | UI notch |
-| `src/main.js` | Logika tab, todo, pomodoro, cuaca, musik demo |
-| `src/styles.css` | Gaya notch (pil hitam, glass, animasi buka/tutup) |
-| `ARCHITECTURE.md` | Desain lengkap + peta jalan ke v1.0 |
+| `notchku-wpf/NotchKu.csproj` | Proyek WPF (.NET Framework 4.8) |
+| `notchku-wpf/MainWindow.xaml` | UI notch (pil + panel 5 tab) |
+| `notchku-wpf/MainWindow.xaml.cs` | Logika: jam, cuaca, todo, kalender, pomodoro, musik demo, hotkey Alt+N |
+| `notchku-wpf/installer.nsi` | Installer NSIS (≤6 MB) |
+| `.github/workflows/release.yml` | Build + rilis otomatis di GitHub Actions |
+| `ARCHITECTURE.md` | Desain lengkap + peta jalan ke v1.0 (versi Tauri lama) |
 
 ## Batasan yang jujur
 
-- Ini MVP v0.1. Di sini ada 5 modul inti; modul lain menyusul di versi berikutnya.
-- Musik SMTC Windows, notifikasi Windows, dan Dock butuh kode
-  Win32 tambahan — sudah dipetakan di `ARCHITECTURE.md`, belum
-  diimplementasikan.
+- Ini MVP v0.2. Di sini ada 5 modul inti; modul lain menyusul di versi berikutnya.
+- Musik SMTC Windows, notifikasi Windows, dan Dock butuh integrasi
+  Win32 tambahan — belum diimplementasikan di v0.2.0.
 - Belum ada code signing, jadi SmartScreen akan muncul seperti
   aplikasi tanpa sertifikat berbayar. Jangan bypass, klik More info → Run anyway hanya
   untuk build sendiri.
