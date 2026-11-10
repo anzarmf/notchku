@@ -1,5 +1,11 @@
 name: Release Windows
 
+# Builds the Windows installer (.exe) on GitHub's Windows runner and
+# publishes it as a GitHub Release, so anyone can download it directly.
+# Runs on every push to main (it re-publishes the same v0.1.2 release
+# with fresh binaries) and can also be started manually from the
+# Actions tab (workflow_dispatch).
+
 on:
   push:
     branches: [main]
