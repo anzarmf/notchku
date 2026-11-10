@@ -43,9 +43,12 @@ jobs:
         run: |
           Copy-Item notchku-wpf\bin\Release\net48\NotchKu.exe NotchKu_0.2.0_x64.exe
 
-      - name: Build installer (NSIS)
+      - name: Install NSIS and build installer
         working-directory: notchku-wpf
-        run: makensis installer.nsi
+        shell: pwsh
+        run: |
+          choco install nsis -y --no-progress
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
       - name: Check installer size
         shell: pwsh
