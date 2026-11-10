@@ -2,7 +2,7 @@
 !include "MUI2.nsh"
 
 Name "NotchKu"
-OutFile "NotchKu_0.2.0_x64-setup.exe"
+OutFile "..\NotchKu_0.2.0_x64-setup.exe"
 InstallDir "$PROGRAMFILES64\NotchKu"
 RequestExecutionLevel admin
 Unicode true
@@ -15,8 +15,8 @@ Unicode true
 
 Section "Install"
   SetOutPath "$INSTDIR"
-  File "notchku-wpf\bin\Release\net48\NotchKu.exe"
-  File "notchku-wpf\bin\Release\net48\Newtonsoft.Json.dll"
+  File "bin\Release\net48\NotchKu.exe"
+  File "bin\Release\net48\Newtonsoft.Json.dll"
   CreateShortcut "$DESKTOP\NotchKu.lnk" "$INSTDIR\NotchKu.exe"
   CreateDirectory "$SMPROGRAMS\NotchKu"
   CreateShortcut "$SMPROGRAMS\NotchKu\NotchKu.lnk" "$INSTDIR\NotchKu.exe"
