@@ -1,21 +1,16 @@
-name: Release Windows
+name: Release NotchKu
 
-# Builds the Windows installer (.exe) on GitHub's Windows runner and
-# publishes it as a GitHub Release, so anyone can download it directly.
-# Runs on every push to main (it re-publishes the same v0.1.2 release
-# with fresh binaries) and can also be started manually from the
-# Actions tab (workflow_dispatch).
+# Builds the NATIVE NotchKu app (WPF / .NET Framework 4.8, no WebView)
+# on GitHub's Windows runner and publishes the installer + portable exe
+# as a GitHub Release, so anyone can download it directly.
+# Runs on every push to main touching the WPF app, and can also be
+# started manually from the Actions tab (workflow_dispatch).
 
 on:
   push:
     branches: [main]
     paths:
-      - "src/**"
-      - "src-tauri/**"
-      - "package.json"
-      - "package-lock.json"
-      - "vite.config.js"
-      - "scripts/**"
+      - "notchku-wpf/**"
       - ".github/workflows/release.yml"
   workflow_dispatch:
 
@@ -28,34 +23,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: 22
-          cache: npm
+          dotnet-version: "8.0.x"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Build NotchKu (WPF, .NET Framework 4.8)
+        run: dotnet build notchku-wpf/NotchKu.csproj -c Release
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Generate app icons
+      - name: Check EXE size
+        shell: pwsh
         run: |
-          pip install pillow
-          python scripts/generate_icon.py
+          $exe = Get-Item notchku-wpf\bin\Release\net48\NotchKu.exe
+          Write-Host "NotchKu.exe size: $($exe.Length) bytes"
+          if ($exe.Length -gt 6291456) { throw "EXE over 6 MB cap: $($exe.Length) bytes" }
 
-      - name: Build and release
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare portable EXE
+        shell: pwsh
+        run: |
+          Copy-Item notchku-wpf\bin\Release\net48\NotchKu.exe NotchKu_0.2.0_x64.exe
+
+      - name: Build installer (NSIS)
+        run: makensis notchku-wpf/installer.nsi
+
+      - name: Check installer size
+        shell: pwsh
+        run: |
+          $inst = Get-Item NotchKu_0.2.0_x64-setup.exe
+          Write-Host "Installer size: $($inst.Length) bytes"
+          if ($inst.Length -gt 6291456) { throw "Installer over 6 MB cap: $($inst.Length) bytes" }
+
+      - name: Publish release v0.2.0
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: v0.1.2
-          releaseName: "NotchKu v0.1.2"
-          releaseBody: |
-            NotchKu v0.1.2 — interactive notch for Windows.
+          tag_name: v0.2.0
+          name: NotchKu v0.2.0 — native WPF, no WebView
+          body: |
+            NotchKu v0.2.0 — native Windows app (WPF, .NET Framework 4.8).
 
-            Download `NotchKu_0.1.2_x64-setup.exe` below, run it, and press `Alt+N` to open the notch.
-            Windows SmartScreen may warn because the installer is not code-signed yet — click "More info" → "Run anyway".
-          releaseDraft: false
+            - No WebView, no WebView2, no extra runtime to install.
+            - .NET Framework 4.8 is built into Windows 10/11.
+            - Installer under 6 MB. Install and run.
+            - Features: music (demo), calendar, todo, pomodoro, weather (Jakarta, Open-Meteo), global hotkey Alt+N.
+            - Windows SmartScreen may warn because the installer is not code-signed yet — click "More info" → "Run anyway".
+          files: |
+            NotchKu_0.2.0_x64-setup.exe
+            NotchKu_0.2.0_x64.exe
+          draft: false
           prerelease: false
