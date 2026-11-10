@@ -45,12 +45,12 @@
         "installerIcon": "icons/icon.ico"
       },
       "webviewInstallMode": {
-        "type": "offlineInstaller"
+        "type": "embedBootstrapper"
       }
     }
   },
   "identifier": "id.zarski.notchku",
   "plugins": {},
   "productName": "NotchKu",
-  "version": "0.1.1"
+  "version": "0.1.2"
 }
