@@ -1,14 +1,19 @@
-# NotchKu — Interactive Notch for Windows (v0.1)
+# NotchKu — Interactive Notch for Windows (v0.2)
 
 NotchKu adalah aplikasi notch interaktif buatanku sendiri, dibangun dari
 nol: sebuah pil kecil di tengah atas layar yang terbuka jadi panel musik,
 kalender, todo, Pomodoro, dan cuaca.
 
+**v0.2.0 sepenuhnya native (Slint/Rust) — tanpa WebView, tanpa browser,
+tanpa runtime tambahan.** Kode Tauri/WebView lama masih ada di repo ini
+sebagai arsip, tapi tidak dipakai lagi; build aktif ada di
+[`notchku-native/`](notchku-native/).
+
 ## ⬇️ Download (Windows)
 
-> Satu installer kecil (≤6 MB), langsung jalan — WebView2 ter-download otomatis saat instal, tidak perlu instal apapun lagi secara manual (butuh internet saat instal).
+> Satu installer kecil (≤6 MB), langsung jalan — tidak perlu instal apapun lagi.
 
-**[Download NotchKu_0.1.2_x64-setup.exe](https://github.com/anzarmf/notchku/releases/latest/download/NotchKu_0.1.2_x64-setup.exe)**
+**[Download NotchKu_0.2.0_x64-setup.exe](https://github.com/anzarmf/notchku/releases/latest/download/NotchKu_0.2.0_x64-setup.exe)**
 
 Jalankan installer-nya, lalu tekan `Alt+N` untuk membuka notch.
 SmartScreen mungkin muncul karena installer belum ditandatangani

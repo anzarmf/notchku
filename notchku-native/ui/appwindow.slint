@@ -1,0 +1,322 @@
+// NotchKu — native UI (Slint). No WebView, no browser engine.
+// The window itself is the notch: 220x32 as a pill when collapsed,
+// 560x380 as a panel when expanded. Window background is transparent
+// so the pill/panel rounded corners are real.
+
+import { Button, LineEdit, ScrollView, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+export struct TodoItem {
+    text: string,
+    done: bool,
+}
+
+export component AppWindow inherits Window {
+    width: expanded ? 560px : 220px;
+    height: expanded ? 380px : 32px;
+    no-frame: true;
+    always-on-top: true;
+    background: transparent;
+    title: "NotchKu";
+
+    in-out property <bool> expanded: false;
+    in-out property <string> tab: "music";
+    in-out property <string> clock-text: "--:--";
+    in-out property <string> weather-text: "";
+    in-out property <string> weather-detail: "Memuat cuaca…";
+    in-out property <string> music-title: "Tidak ada lagu";
+    in-out property <string> music-artist: "Pemutar demo";
+    in-out property <bool> music-playing: false;
+    in-out property <float> music-progress: 0.0;
+    in-out property <string> calendar-title: "";
+    in-out property <[[string]]> cal-weeks: [];
+    in-out property <[TodoItem]> todos: [];
+    in-out property <string> new-todo: "";
+    in-out property <string> pomodoro-text: "25:00";
+    in-out property <string> pomodoro-mode: "Fokus";
+    in-out property <bool> pomodoro-running: false;
+
+    callback toggle-expanded();
+    callback collapse();
+    callback set-tab(string);
+    callback toggle-todo(int);
+    callback delete-todo(int);
+    callback add-todo();
+    callback pomodoro-toggle();
+    callback pomodoro-reset();
+    callback music-toggle();
+    callback music-next();
+    callback music-prev();
+    callback refresh-weather();
+
+    // ---------- Collapsed pill ----------
+    pill := TouchArea {
+        visible: !root.expanded;
+        width: 100%;
+        height: 100%;
+        clicked => { root.toggle-expanded(); }
+        Rectangle {
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            border-radius: 16px;
+            HorizontalBox {
+                padding-left: 12px;
+                padding-right: 12px;
+                spacing: 10px;
+                alignment: center;
+                Text {
+                    text: root.weather-text;
+                    color: #9ca3af;
+                    font-size: 12px;
+                }
+                Text {
+                    text: root.clock-text;
+                    color: #ffffff;
+                    font-size: 13px;
+                    font-weight: 700;
+                }
+                Text {
+                    text: root.music-playing ? "♪ " + root.music-title : "";
+                    color: #a78bfa;
+                    font-size: 12px;
+                }
+            }
+        }
+    }
+
+    // ---------- Expanded panel ----------
+    panel := Rectangle {
+        visible: root.expanded;
+        width: 100%;
+        height: 100%;
+        background: #0f0f0f;
+        border-radius: 16px;
+        VerticalBox {
+            width: 100%;
+            height: 100%;
+            padding: 0px;
+            spacing: 0px;
+
+            // Tab bar
+            Rectangle {
+                height: 44px;
+                background: #171717;
+                HorizontalBox {
+                    padding-left: 10px;
+                    padding-right: 6px;
+                    spacing: 4px;
+                    alignment: space-between;
+                    HorizontalBox {
+                        spacing: 2px;
+                        TouchArea {
+                            width: 72px;
+                            height: 32px;
+                            clicked => { root.set-tab("music"); }
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+                                background: root.tab == "music" ? #7c3aed : transparent;
+                                border-radius: 8px;
+                                Text { text: "♪ Musik"; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                        }
+                        TouchArea {
+                            width: 92px;
+                            height: 32px;
+                            clicked => { root.set-tab("calendar"); }
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+                                background: root.tab == "calendar" ? #7c3aed : transparent;
+                                border-radius: 8px;
+                                Text { text: "📅 Kalender"; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                        }
+                        TouchArea {
+                            width: 72px;
+                            height: 32px;
+                            clicked => { root.set-tab("todo"); }
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+                                background: root.tab == "todo" ? #7c3aed : transparent;
+                                border-radius: 8px;
+                                Text { text: "✓ Todo"; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                        }
+                        TouchArea {
+                            width: 96px;
+                            height: 32px;
+                            clicked => { root.set-tab("pomodoro"); }
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+                                background: root.tab == "pomodoro" ? #7c3aed : transparent;
+                                border-radius: 8px;
+                                Text { text: "🍅 Pomodoro"; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                        }
+                        TouchArea {
+                            width: 82px;
+                            height: 32px;
+                            clicked => { root.set-tab("weather"); }
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+                                background: root.tab == "weather" ? #7c3aed : transparent;
+                                border-radius: 8px;
+                                Text { text: "🌤️ Cuaca"; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                        }
+                    }
+                    TouchArea {
+                        width: 30px;
+                        height: 32px;
+                        clicked => { root.collapse(); }
+                        Text { text: "✕"; color: #9ca3af; font-size: 14px; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                }
+            }
+
+            // ---- Music tab ----
+            VerticalBox {
+                visible: root.tab == "music";
+                padding: 24px;
+                spacing: 12px;
+                alignment: center;
+                Text { text: root.music-title; color: #ffffff; font-size: 20px; font-weight: 700; horizontal-alignment: center; }
+                Text { text: root.music-artist; color: #9ca3af; font-size: 14px; horizontal-alignment: center; }
+                Rectangle {
+                    height: 6px;
+                    background: #262626;
+                    border-radius: 3px;
+                    Rectangle {
+                        width: root.music-progress * parent.width;
+                        height: 100%;
+                        background: #7c3aed;
+                        border-radius: 3px;
+                    }
+                }
+                HorizontalBox {
+                    spacing: 12px;
+                    alignment: center;
+                    Button { text: "⏮"; clicked => { root.music-prev(); } }
+                    Button { text: root.music-playing ? "⏸" : "▶"; clicked => { root.music-toggle(); } }
+                    Button { text: "⏭"; clicked => { root.music-next(); } }
+                }
+                Text { text: "Pemutar demo — integrasi SMTC Windows menyusul."; color: #6b7280; font-size: 12px; horizontal-alignment: center; }
+            }
+
+            // ---- Calendar tab ----
+            VerticalBox {
+                visible: root.tab == "calendar";
+                padding: 20px;
+                spacing: 8px;
+                Text { text: root.calendar-title; color: #ffffff; font-size: 17px; font-weight: 700; }
+                HorizontalBox {
+                    spacing: 0px;
+                    for wd in ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"] : Text {
+                        text: wd;
+                        color: #9ca3af;
+                        font-size: 12px;
+                        width: 72px;
+                        horizontal-alignment: center;
+                    }
+                }
+                for week in root.cal-weeks : HorizontalBox {
+                    spacing: 0px;
+                    for day in week : Rectangle {
+                        width: 72px;
+                        height: 34px;
+                        Text {
+                            text: day;
+                            color: day == "" ? #262626 : #e5e7eb;
+                            font-size: 14px;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+
+            // ---- Todo tab ----
+            VerticalBox {
+                visible: root.tab == "todo";
+                padding: 20px;
+                spacing: 10px;
+                HorizontalBox {
+                    spacing: 8px;
+                    LineEdit {
+                        text <=> root.new-todo;
+                        placeholder-text: "Tugas baru… (Enter untuk tambah)";
+                        accepted => { root.add-todo(); }
+                    }
+                    Button { text: "＋ Tambah"; clicked => { root.add-todo(); } }
+                }
+                ScrollView {
+                    vertical-stretch: 1;
+                    VerticalBox {
+                        spacing: 6px;
+                        for todo[index] in root.todos : HorizontalBox {
+                            spacing: 8px;
+                            TouchArea {
+                                width: 22px;
+                                height: 22px;
+                                clicked => { root.toggle-todo(index); }
+                                Rectangle {
+                                    width: 100%;
+                                    height: 100%;
+                                    background: todo.done ? #7c3aed : transparent;
+                                    border-width: 2px;
+                                    border-color: #7c3aed;
+                                    border-radius: 6px;
+                                    Text { text: todo.done ? "✓" : ""; color: #ffffff; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                                }
+                            }
+                            Text {
+                                text: todo.text;
+                                color: todo.done ? #6b7280 : #e5e7eb;
+                                font-size: 14px;
+                                vertical-alignment: center;
+                            }
+                            TouchArea {
+                                width: 20px;
+                                height: 22px;
+                                clicked => { root.delete-todo(index); }
+                                Text { text: "✕"; color: #6b7280; font-size: 13px; vertical-alignment: center; }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ---- Pomodoro tab ----
+            VerticalBox {
+                visible: root.tab == "pomodoro";
+                padding: 24px;
+                spacing: 12px;
+                alignment: center;
+                Text { text: root.pomodoro-mode; color: #a78bfa; font-size: 15px; font-weight: 700; horizontal-alignment: center; }
+                Text { text: root.pomodoro-text; color: #ffffff; font-size: 52px; font-weight: 700; horizontal-alignment: center; }
+                HorizontalBox {
+                    spacing: 12px;
+                    alignment: center;
+                    Button { text: root.pomodoro-running ? "⏸ Jeda" : "▶ Mulai"; clicked => { root.pomodoro-toggle(); } }
+                    Button { text: "↺ Reset"; clicked => { root.pomodoro-reset(); } }
+                }
+                Text { text: "Fokus 25 menit, istirahat 5 menit."; color: #6b7280; font-size: 12px; horizontal-alignment: center; }
+            }
+
+            // ---- Weather tab ----
+            VerticalBox {
+                visible: root.tab == "weather";
+                padding: 24px;
+                spacing: 10px;
+                alignment: center;
+                Text { text: root.weather-detail; color: #ffffff; font-size: 17px; horizontal-alignment: center; wrap: word-wrap; }
+                Button { text: "↻ Perbarui cuaca"; clicked => { root.refresh-weather(); } }
+                Text { text: "Sumber: Open-Meteo, tanpa API key."; color: #6b7280; font-size: 12px; horizontal-alignment: center; }
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+[package]
+name = "notchku-native"
+version = "0.2.0"
+edition = "2021"
+description = "NotchKu — interactive notch for Windows, native UI (Slint, no WebView)"
+authors = ["Zarski"]
+
+[[bin]]
+name = "NotchKu"
+path = "src/main.rs"
+
+[build-dependencies]
+slint-build = "1.10"
+
+[dependencies]
+slint = "1.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.12", features = ["blocking", "json", "rustls-tls"], default-features = false }
+global-hotkey = "0.6"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = true
